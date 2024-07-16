@@ -16703,8 +16703,7 @@ const vx = /* @__PURE__ */ Pu(gx), yx = (r) => {
       )
     }
   );
-}, { DirectoryTree: bx } = yc, xx = () => console.log("Texture loaded");
-function Cx({ consumerSetMeshes: r }) {
+}, { DirectoryTree: bx } = yc, xx = () => console.log("Texture loaded"), Cx = ({ consumerSetMeshes: r }) => {
   const [e, t] = dt([]);
   dt([]);
   const [n, i] = dt(), [o, s] = dt(), [a, c] = dt(), [l, u] = dt("");
@@ -16893,8 +16892,12 @@ function Cx({ consumerSetMeshes: r }) {
       )
     ] })
   ] });
-}
-const Mx = (r, e) => r + e;
+}, Mx = (r, e) => r + e;
+window.process = {
+  env: {
+    NODE_ENV: "production"
+  }
+};
 export {
   Cx as App,
   Mx as add
