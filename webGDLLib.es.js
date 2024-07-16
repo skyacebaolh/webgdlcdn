@@ -16074,11 +16074,11 @@ function _asyncToGenerator(n) {
 }
 var fullClone = _objectSpread2({}, ReactDOM);
 var version = fullClone.version, reactRender = fullClone.render, unmountComponentAtNode = fullClone.unmountComponentAtNode;
-var createRoot;
+var createRoot$1;
 try {
   var mainVersion = Number((version || "").split(".")[0]);
   if (mainVersion >= 18) {
-    createRoot = fullClone.createRoot;
+    createRoot$1 = fullClone.createRoot;
   }
 } catch (e) {
 }
@@ -16091,7 +16091,7 @@ function toggleWarning(skip) {
 var MARK = "__rc_react_root__";
 function modernRender(node2, container) {
   toggleWarning(true);
-  var root = container[MARK] || createRoot(container);
+  var root = container[MARK] || createRoot$1(container);
   toggleWarning(false);
   root.render(node2);
   container[MARK] = root;
@@ -16100,7 +16100,7 @@ function legacyRender(node2, container) {
   reactRender(node2, container);
 }
 function render(node2, container) {
-  if (createRoot) {
+  if (createRoot$1) {
     modernRender(node2, container);
     return;
   }
@@ -16138,7 +16138,7 @@ function _unmount() {
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) switch (_context2.prev = _context2.next) {
         case 0:
-          if (!(createRoot !== void 0)) {
+          if (!(createRoot$1 !== void 0)) {
             _context2.next = 2;
             break;
           }
@@ -24349,96 +24349,101 @@ const App = ({ consumerSetMeshes }) => {
     }
   };
   const [showParameterDialog, setShowParameterDialog] = useState(false);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      ConvertJsonDataToThreeMeshes,
-      {
-        jsonData,
-        textureLocation,
-        textureLoadedCallback,
-        setMeshs: consumerSetMeshes
-      }
-    ),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", width: "100%" }, children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "div",
+  const rootElement = document.getElementById("root");
+  const root = createRoot(rootElement);
+  root.render(
+    /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        ConvertJsonDataToThreeMeshes,
         {
-          style: {
-            height: "100vh",
-            minWidth: "15vw",
-            // background: "#FCC",
-            overflowY: "scroll"
-          },
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "div",
-              {
-                style: {
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%"
-                },
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "モデル一覧" }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx(
-                    "button",
-                    {
-                      onClick: () => {
-                        fileRef.current.click();
-                      },
-                      children: "新規追加"
-                    }
-                  )
-                ]
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                type: "file",
-                name: "file",
-                id: "file",
-                ref: fileRef,
-                onChange: handleFileUpload,
-                style: { display: "none" }
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              DirectoryTree,
-              {
-                onSelect,
-                treeData: models,
-                fieldNames: { key: "name", children: "items", title: "name" },
-                showIcon: false,
-                onExpand,
-                showLine: true
-              }
-            )
-          ]
+          jsonData,
+          textureLocation,
+          textureLoadedCallback,
+          setMeshs: consumerSetMeshes
         }
       ),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(
-        PropertiesDialog,
-        {
-          open: showParameterDialog,
-          footer: null,
-          onOk: () => {
-            setShowParameterDialog(false);
-          },
-          children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            ParametersForm,
-            {
-              current: currentGSM,
-              location: textureLocation,
-              materialAndPenTable,
-              parametersJsonFileName: "parameters.js",
-              generate3DModelOnCurrentGSM
-            }
-          )
-        }
-      )
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", width: "100%" }, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
+          {
+            style: {
+              height: "100vh",
+              minWidth: "15vw",
+              // background: "#FCC",
+              overflowY: "scroll"
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "div",
+                {
+                  style: {
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%"
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { children: "モデル一覧" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "button",
+                      {
+                        onClick: () => {
+                          fileRef.current.click();
+                        },
+                        children: "新規追加"
+                      }
+                    )
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "input",
+                {
+                  type: "file",
+                  name: "file",
+                  id: "file",
+                  ref: fileRef,
+                  onChange: handleFileUpload,
+                  style: { display: "none" }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                DirectoryTree,
+                {
+                  onSelect,
+                  treeData: models,
+                  fieldNames: { key: "name", children: "items", title: "name" },
+                  showIcon: false,
+                  onExpand,
+                  showLine: true
+                }
+              )
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          PropertiesDialog,
+          {
+            open: showParameterDialog,
+            footer: null,
+            onOk: () => {
+              setShowParameterDialog(false);
+            },
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+              ParametersForm,
+              {
+                current: currentGSM,
+                location: textureLocation,
+                materialAndPenTable,
+                parametersJsonFileName: "parameters.js",
+                generate3DModelOnCurrentGSM
+              }
+            )
+          }
+        )
+      ] })
     ] })
-  ] });
+  );
+  return null;
 };
 const add = (a, b) => a + b;
 window.process = {
