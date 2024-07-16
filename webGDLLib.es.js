@@ -16897,6 +16897,6 @@ Valid keys: ` + JSON.stringify(Object.keys(T), null, "  ")
     ] });
   }
   const Cx = (r, e) => r + e;
-  window.WebGDL = { App: wx, add: Cx };
+  window.WebGDL = { WebGDL: wx, add: Cx };
 });
 export default Mx();
