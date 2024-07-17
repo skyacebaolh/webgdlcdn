@@ -9568,7 +9568,7 @@ function _objectWithoutPropertiesLoose(r2, e) {
   if (null == r2) return {};
   var t = {};
   for (var n in r2) if ({}.hasOwnProperty.call(r2, n)) {
-    if (e.indexOf(n) >= 0) continue;
+    if (e.includes(n)) continue;
     t[n] = r2[n];
   }
   return t;
@@ -9577,8 +9577,8 @@ function _objectWithoutProperties(e, t) {
   if (null == e) return {};
   var o, r2, i = _objectWithoutPropertiesLoose(e, t);
   if (Object.getOwnPropertySymbols) {
-    var n = Object.getOwnPropertySymbols(e);
-    for (r2 = 0; r2 < n.length; r2++) o = n[r2], t.indexOf(o) >= 0 || {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]);
+    var s = Object.getOwnPropertySymbols(e);
+    for (r2 = 0; r2 < s.length; r2++) o = s[r2], t.includes(o) || {}.propertyIsEnumerable.call(e, o) && (i[o] = e[o]);
   }
   return i;
 }
@@ -11372,7 +11372,13 @@ var locale$3 = {
   next_3: "Next 3 Pages",
   page_size: "Page Size"
 };
-var locale$2 = {
+var commonLocale = {
+  yearFormat: "YYYY",
+  dayFormat: "D",
+  cellMeridiemFormat: "A",
+  monthBeforeYear: true
+};
+var locale$2 = _objectSpread2(_objectSpread2({}, commonLocale), {}, {
   locale: "en_US",
   today: "Today",
   now: "Now",
@@ -11387,11 +11393,8 @@ var locale$2 = {
   monthSelect: "Choose a month",
   yearSelect: "Choose a year",
   decadeSelect: "Choose a decade",
-  yearFormat: "YYYY",
   dateFormat: "M/D/YYYY",
-  dayFormat: "D",
   dateTimeFormat: "M/D/YYYY HH:mm:ss",
-  monthBeforeYear: true,
   previousMonth: "Previous month (PageUp)",
   nextMonth: "Next month (PageDown)",
   previousYear: "Last year (Control + left)",
@@ -11400,7 +11403,7 @@ var locale$2 = {
   nextDecade: "Next decade",
   previousCentury: "Last century",
   nextCentury: "Next century"
-};
+});
 const locale$1 = {
   placeholder: "Select time",
   rangePlaceholder: ["Start time", "End time"]
@@ -13042,12 +13045,13 @@ const defaultConfig = {
   hashed: true
 };
 const DesignTokenContext = /* @__PURE__ */ React__default.createContext(defaultConfig);
+const defaultPrefixCls = "ant";
 const defaultIconPrefixCls = "anticon";
 const defaultGetPrefixCls = (suffixCls, customizePrefixCls) => {
   if (customizePrefixCls) {
     return customizePrefixCls;
   }
-  return suffixCls ? `ant-${suffixCls}` : "ant";
+  return suffixCls ? `${defaultPrefixCls}-${suffixCls}` : defaultPrefixCls;
 };
 const ConfigContext = /* @__PURE__ */ React$1.createContext({
   // We provide a default function for Context without provider
@@ -13146,7 +13150,7 @@ function useConfig() {
     componentSize
   };
 }
-const version$1 = "5.19.1";
+const version$1 = "5.19.2";
 function isStableColor(color) {
   return color >= 0 && color <= 255;
 }
@@ -14679,7 +14683,6 @@ process$1.env.NODE_ENV !== "production" ? (componentName) => {
   null
 );
 const PASSED_PROPS = ["getTargetContainer", "getPopupContainer", "renderEmpty", "input", "pagination", "form", "select", "button"];
-const defaultPrefixCls = "ant";
 let globalPrefixCls;
 function getGlobalPrefixCls() {
   return globalPrefixCls || defaultPrefixCls;
@@ -24445,6 +24448,7 @@ const WebGDL = ({ consumerSetMeshes }) => {
   );
   return null;
 };
+console.log("React version in library:", React__default.version);
 const Test = () => {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "OK LET'S GO" });
 };
