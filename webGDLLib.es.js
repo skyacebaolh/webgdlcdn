@@ -24445,6 +24445,9 @@ const WebGDL = ({ consumerSetMeshes }) => {
   );
   return null;
 };
+const Test = () => {
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "OK LET'S GO" });
+};
 const add = (a, b) => a + b;
 window.process = {
   env: {
@@ -24452,6 +24455,7 @@ window.process = {
   }
 };
 export {
+  Test,
   WebGDL,
   add
 };

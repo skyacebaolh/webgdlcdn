@@ -24463,12 +24463,16 @@
     );
     return null;
   };
+  const Test = () => {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "OK LET'S GO" });
+  };
   const add = (a, b) => a + b;
   window.process = {
     env: {
       NODE_ENV: "production"
     }
   };
+  exports2.Test = Test;
   exports2.WebGDL = WebGDL;
   exports2.add = add;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
