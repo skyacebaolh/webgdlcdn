@@ -24468,8 +24468,10 @@
   };
   console.log("React version in library:", React$1.version);
   const Test = () => {
-    const [text, setText] = React$1.useState("Mark my word");
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: text });
+    React$1.useEffect(() => {
+      console.log("loaded");
+    }, []);
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "Loaded library" });
   };
   const add = (a, b) => a + b;
   window.process = {

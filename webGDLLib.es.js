@@ -24450,8 +24450,10 @@ const WebGDL = ({ consumerSetMeshes }) => {
 };
 console.log("React version in library:", React__default.version);
 const Test = () => {
-  const [text, setText] = useState("Mark my word");
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: text });
+  useEffect(() => {
+    console.log("loaded");
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "Loaded library" });
 };
 const add = (a, b) => a + b;
 window.process = {
