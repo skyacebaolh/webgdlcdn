@@ -1114,6 +1114,285 @@ if (process$1.env.NODE_ENV === "production") {
   jsxRuntime.exports = requireReactJsxRuntime_development();
 }
 var jsxRuntimeExports = jsxRuntime.exports;
+const ParT = {
+  Integer: 0,
+  Length: 2,
+  Angle: 3,
+  RealNum: 4,
+  LightSw: 5,
+  ColRGB: 6,
+  Intens: 7,
+  LineTyp: 8,
+  Mater: 9,
+  FillPat: 10,
+  PenCol: 11,
+  CString: 12,
+  Boolean: 13,
+  Separator: 14,
+  Title: 15,
+  BuildingMaterial: 16,
+  Profile: 17,
+  Dictionary: 18
+};
+const Type_e = {
+  Int: 0,
+  String: 1,
+  Dict: 2,
+  Num: 3
+};
+const GDLGetStorageCategory = (type) => {
+  switch (type) {
+    case ParT.Integer:
+    case ParT.LightSw:
+    case ParT.Intens:
+    case ParT.LineTyp:
+    case ParT.Mater:
+    case ParT.FillPat:
+    case ParT.PenCol:
+    case ParT.Boolean:
+    case ParT.BuildingMaterial:
+    case ParT.Profile:
+      return Type_e.Int;
+    case ParT.CString:
+      return Type_e.String;
+    case ParT.Dictionary:
+      return Type_e.Dict;
+    default:
+      return Type_e.Num;
+  }
+};
+const ParametersForm = ({
+  location,
+  parametersJsonFileName,
+  current,
+  materialAndPenTable,
+  generate3DModelOnCurrentGSM
+}) => {
+  if (!current) return;
+  const [paramsJsonData, setParamsJsonData] = useState(null);
+  const [paramName, setParamName] = useState();
+  const getSelectionArrayFromRange = (type, range) => {
+    if (type == ParT.PenCol) {
+      return materialAndPenTable == null ? void 0 : materialAndPenTable.pens;
+    } else if (type == ParT.Mater) {
+      return materialAndPenTable == null ? void 0 : materialAndPenTable.surfaces;
+    } else if (GDLGetStorageCategory(type) === Type_e.String) {
+      return range.strValues;
+    } else {
+      return range.numRanges;
+    }
+  };
+  const setValidatorForParameterSelectionField = (type, range) => {
+    if (!isSelectionInputNeeded(type, range)) {
+      return;
+    }
+    var array = getSelectionArrayFromRange(type, range);
+    return array == null ? void 0 : array.map((x, index2) => {
+      var setting = {};
+      var displayName = "";
+      if (type === ParT.PenCol) {
+        displayName = x[0];
+        setting = {
+          ...setting,
+          value: x[0],
+          style: { backgroundColor: `rgb(${x[1]},${x[2]},${x[3]})` }
+        };
+      } else if (type === ParT.Mater) {
+        displayName = x[1];
+        setting = {
+          ...setting,
+          value: x[0]
+        };
+      } else if (GDLGetStorageCategory(type) == Type_e.String) {
+        setting = {
+          ...setting,
+          value: x
+        };
+        displayName = x;
+      } else {
+        var numVal = createNumValObjectFromArray(x);
+        var des = "";
+        if (numVal.valueDescription != "") {
+          des = numVal.valueDescription;
+        } else {
+          des = numVal.value;
+        }
+        setting = {
+          ...setting,
+          value: numVal.value
+        };
+        displayName = des;
+      }
+      return /* @__PURE__ */ jsxRuntimeExports.jsx("option", { ...setting, children: displayName }, index2);
+    });
+  };
+  const isSelectionInputNeeded = (type, range) => {
+    if (type == ParT.PenCol || type == ParT.Mater) {
+      return true;
+    }
+    switch (GDLGetStorageCategory(type)) {
+      case Type_e.Int:
+      case Type_e.Num:
+        return range.hasValues && !range.hasRange;
+      default:
+        return range.hasValues;
+    }
+  };
+  function createNumValObjectFromArray(range) {
+    return {
+      value: range[0],
+      lowerLimit: range[1],
+      upperLimit: range[2],
+      stepBeg: range[3],
+      stepVal: range[4],
+      flags: range[5],
+      valueDescription: range[6]
+    };
+  }
+  useEffect(() => {
+    fetch(`${location}/${parametersJsonFileName}`).then((response) => response.json()).then((data) => {
+      setParamsJsonData(data);
+    }).catch((error) => console.error("Error fetching parameters:", error));
+  }, [location, parametersJsonFileName]);
+  useEffect(() => {
+    if (paramName && paramsJsonData) {
+      generate3DModelOnCurrentGSM(
+        paramsJsonData.parameters[paramName].name,
+        paramsJsonData
+      );
+      setParamName(null);
+    }
+  }, [paramName, paramsJsonData]);
+  const changeHandler = (parameter, index2) => (event) => {
+    const { name, value, type, checked, nodeName, options, selectedIndex } = event.target;
+    var newValue = type === "checkbox" ? checked : value;
+    if (nodeName.toLowerCase() === "select") {
+      newValue = options[selectedIndex].value;
+    }
+    setParamName((pre) => name);
+    setParamsJsonData((prevData) => {
+      const newParams = [...prevData.parameters];
+      switch (GDLGetStorageCategory(newParams[index2].type)) {
+        case Type_e.Num:
+        case Type_e.Int:
+          newValue = Number(newValue);
+          break;
+      }
+      newParams[index2] = { ...newParams[index2], value: newValue };
+      return { ...prevData, parameters: newParams };
+    });
+  };
+  const getParameterDescription = (parameter) => {
+    if (parameter.description !== "") return parameter.description;
+    if (parameter.name.toLowerCase() === "a") return "Dimension 1";
+    if (parameter.name.toLowerCase() === "b") return "Dimension 2";
+    if (parameter.name.toLowerCase() === "zzyzx") return "Height";
+    return parameter.name;
+  };
+  const renderInputField = (parameter, index2) => {
+    let inputField = null;
+    if (isSelectionInputNeeded(parameter.type, parameter.range)) {
+      inputField = /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "select",
+        {
+          name: index2,
+          value: parameter.value,
+          onChange: changeHandler(parameter, index2),
+          children: setValidatorForParameterSelectionField(
+            parameter.type,
+            parameter.range
+          )
+        }
+      );
+    } else {
+      const isArray = Array.isArray(parameter.value);
+      var type;
+      if (isArray) {
+        parameter.value.length;
+        if (Array.isArray(parameter.value[0])) {
+          parameter.value[0].length;
+        }
+      }
+      switch (GDLGetStorageCategory(parameter.type)) {
+        case Type_e.Int:
+          switch (parameter.type) {
+            case ParT.Boolean:
+              type = "checkbox";
+              break;
+            default:
+              type = "number";
+              break;
+          }
+          break;
+        case Type_e.Num:
+          type = "number";
+          break;
+        default:
+          type = "text";
+          break;
+      }
+      inputField = /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "input",
+        {
+          type: isArray ? "text" : type,
+          name: index2,
+          value: parameter.value,
+          checked: parameter.type === ParT.Boolean ? parameter.value : void 0,
+          onChange: changeHandler(parameter, index2)
+        }
+      );
+    }
+    return inputField;
+  };
+  if (!paramsJsonData) return null;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("form", { id: "parametersform", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { border: "collapse", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("thead", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tr", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("td", { id: "actGSM", colSpan: "2", style: { textAlign: "center" }, children: current == null ? void 0 : current.name }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("tr", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { colSpan: "2", style: { textAlign: "center" }, children: [
+        "パラメータ設定 | ",
+        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "#", onClick: () => generate3DModelOnCurrentGSM(), children: "元に設定する" })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: "名称" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: "値" })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: paramsJsonData.parameters.map(
+      (parameter, index2) => parameter.visible ? /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "td",
+          {
+            colSpan: parameter.type === ParT.Title ? 2 : 1,
+            style: {
+              textAlign: parameter.type === ParT.Title ? "center" : "",
+              backgroundColor: parameter.type === ParT.Title ? "#EEEEEE" : ""
+            },
+            children: getParameterDescription(parameter)
+          }
+        ),
+        parameter.type !== ParT.Title && /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: parameter.enabled ? renderInputField(parameter, index2) : parameter.value })
+      ] }, index2) : null
+    ) })
+  ] }) });
+};
+const Command = {
+  GetMaterialAndPenTable: {
+    Command: "GetMaterialAndPenTable"
+  },
+  GetLibraryObjects: {
+    Command: "GetLibraryObjects"
+  },
+  Generate3DModel: {
+    Command: "Generate3DModel"
+  },
+  GetPreviewImage: {
+    Command: "GetPreviewImage"
+  }
+};
+const Endpoint = {
+  API: "http://yhk.tgl-cloud.com:8989/ConvertToJSON",
+  FILE_UPLOAD: "http://yhk.tgl-cloud.com:8989/register"
+};
 /**
  * @license
  * Copyright 2010-2024 Three.js Authors
@@ -7547,285 +7826,6 @@ if (typeof window !== "undefined") {
     window.__THREE__ = REVISION;
   }
 }
-const ParT = {
-  Integer: 0,
-  Length: 2,
-  Angle: 3,
-  RealNum: 4,
-  LightSw: 5,
-  ColRGB: 6,
-  Intens: 7,
-  LineTyp: 8,
-  Mater: 9,
-  FillPat: 10,
-  PenCol: 11,
-  CString: 12,
-  Boolean: 13,
-  Separator: 14,
-  Title: 15,
-  BuildingMaterial: 16,
-  Profile: 17,
-  Dictionary: 18
-};
-const Type_e = {
-  Int: 0,
-  String: 1,
-  Dict: 2,
-  Num: 3
-};
-const GDLGetStorageCategory = (type) => {
-  switch (type) {
-    case ParT.Integer:
-    case ParT.LightSw:
-    case ParT.Intens:
-    case ParT.LineTyp:
-    case ParT.Mater:
-    case ParT.FillPat:
-    case ParT.PenCol:
-    case ParT.Boolean:
-    case ParT.BuildingMaterial:
-    case ParT.Profile:
-      return Type_e.Int;
-    case ParT.CString:
-      return Type_e.String;
-    case ParT.Dictionary:
-      return Type_e.Dict;
-    default:
-      return Type_e.Num;
-  }
-};
-const ParametersForm = ({
-  location,
-  parametersJsonFileName,
-  current,
-  materialAndPenTable,
-  generate3DModelOnCurrentGSM
-}) => {
-  if (!current) return;
-  const [paramsJsonData, setParamsJsonData] = useState(null);
-  const [paramName, setParamName] = useState();
-  const getSelectionArrayFromRange = (type, range) => {
-    if (type == ParT.PenCol) {
-      return materialAndPenTable == null ? void 0 : materialAndPenTable.pens;
-    } else if (type == ParT.Mater) {
-      return materialAndPenTable == null ? void 0 : materialAndPenTable.surfaces;
-    } else if (GDLGetStorageCategory(type) === Type_e.String) {
-      return range.strValues;
-    } else {
-      return range.numRanges;
-    }
-  };
-  const setValidatorForParameterSelectionField = (type, range) => {
-    if (!isSelectionInputNeeded(type, range)) {
-      return;
-    }
-    var array = getSelectionArrayFromRange(type, range);
-    return array == null ? void 0 : array.map((x, index2) => {
-      var setting = {};
-      var displayName = "";
-      if (type === ParT.PenCol) {
-        displayName = x[0];
-        setting = {
-          ...setting,
-          value: x[0],
-          style: { backgroundColor: `rgb(${x[1]},${x[2]},${x[3]})` }
-        };
-      } else if (type === ParT.Mater) {
-        displayName = x[1];
-        setting = {
-          ...setting,
-          value: x[0]
-        };
-      } else if (GDLGetStorageCategory(type) == Type_e.String) {
-        setting = {
-          ...setting,
-          value: x
-        };
-        displayName = x;
-      } else {
-        var numVal = createNumValObjectFromArray(x);
-        var des = "";
-        if (numVal.valueDescription != "") {
-          des = numVal.valueDescription;
-        } else {
-          des = numVal.value;
-        }
-        setting = {
-          ...setting,
-          value: numVal.value
-        };
-        displayName = des;
-      }
-      return /* @__PURE__ */ jsxRuntimeExports.jsx("option", { ...setting, children: displayName }, index2);
-    });
-  };
-  const isSelectionInputNeeded = (type, range) => {
-    if (type == ParT.PenCol || type == ParT.Mater) {
-      return true;
-    }
-    switch (GDLGetStorageCategory(type)) {
-      case Type_e.Int:
-      case Type_e.Num:
-        return range.hasValues && !range.hasRange;
-      default:
-        return range.hasValues;
-    }
-  };
-  function createNumValObjectFromArray(range) {
-    return {
-      value: range[0],
-      lowerLimit: range[1],
-      upperLimit: range[2],
-      stepBeg: range[3],
-      stepVal: range[4],
-      flags: range[5],
-      valueDescription: range[6]
-    };
-  }
-  useEffect(() => {
-    fetch(`${location}/${parametersJsonFileName}`).then((response) => response.json()).then((data) => {
-      setParamsJsonData(data);
-    }).catch((error) => console.error("Error fetching parameters:", error));
-  }, [location, parametersJsonFileName]);
-  useEffect(() => {
-    if (paramName && paramsJsonData) {
-      generate3DModelOnCurrentGSM(
-        paramsJsonData.parameters[paramName].name,
-        paramsJsonData
-      );
-      setParamName(null);
-    }
-  }, [paramName, paramsJsonData]);
-  const changeHandler = (parameter, index2) => (event) => {
-    const { name, value, type, checked, nodeName, options, selectedIndex } = event.target;
-    var newValue = type === "checkbox" ? checked : value;
-    if (nodeName.toLowerCase() === "select") {
-      newValue = options[selectedIndex].value;
-    }
-    setParamName((pre) => name);
-    setParamsJsonData((prevData) => {
-      const newParams = [...prevData.parameters];
-      switch (GDLGetStorageCategory(newParams[index2].type)) {
-        case Type_e.Num:
-        case Type_e.Int:
-          newValue = Number(newValue);
-          break;
-      }
-      newParams[index2] = { ...newParams[index2], value: newValue };
-      return { ...prevData, parameters: newParams };
-    });
-  };
-  const getParameterDescription = (parameter) => {
-    if (parameter.description !== "") return parameter.description;
-    if (parameter.name.toLowerCase() === "a") return "Dimension 1";
-    if (parameter.name.toLowerCase() === "b") return "Dimension 2";
-    if (parameter.name.toLowerCase() === "zzyzx") return "Height";
-    return parameter.name;
-  };
-  const renderInputField = (parameter, index2) => {
-    let inputField = null;
-    if (isSelectionInputNeeded(parameter.type, parameter.range)) {
-      inputField = /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "select",
-        {
-          name: index2,
-          value: parameter.value,
-          onChange: changeHandler(parameter, index2),
-          children: setValidatorForParameterSelectionField(
-            parameter.type,
-            parameter.range
-          )
-        }
-      );
-    } else {
-      const isArray = Array.isArray(parameter.value);
-      var type;
-      if (isArray) {
-        parameter.value.length;
-        if (Array.isArray(parameter.value[0])) {
-          parameter.value[0].length;
-        }
-      }
-      switch (GDLGetStorageCategory(parameter.type)) {
-        case Type_e.Int:
-          switch (parameter.type) {
-            case ParT.Boolean:
-              type = "checkbox";
-              break;
-            default:
-              type = "number";
-              break;
-          }
-          break;
-        case Type_e.Num:
-          type = "number";
-          break;
-        default:
-          type = "text";
-          break;
-      }
-      inputField = /* @__PURE__ */ jsxRuntimeExports.jsx(
-        "input",
-        {
-          type: isArray ? "text" : type,
-          name: index2,
-          value: parameter.value,
-          checked: parameter.type === ParT.Boolean ? parameter.value : void 0,
-          onChange: changeHandler(parameter, index2)
-        }
-      );
-    }
-    return inputField;
-  };
-  if (!paramsJsonData) return null;
-  return /* @__PURE__ */ jsxRuntimeExports.jsx("form", { id: "parametersform", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { border: "collapse", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("thead", { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("tr", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("td", { id: "actGSM", colSpan: "2", style: { textAlign: "center" }, children: current == null ? void 0 : current.name }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("tr", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { colSpan: "2", style: { textAlign: "center" }, children: [
-        "パラメータ設定 | ",
-        /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "#", onClick: () => generate3DModelOnCurrentGSM(), children: "元に設定する" })
-      ] }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: "名称" }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: "値" })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: paramsJsonData.parameters.map(
-      (parameter, index2) => parameter.visible ? /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "td",
-          {
-            colSpan: parameter.type === ParT.Title ? 2 : 1,
-            style: {
-              textAlign: parameter.type === ParT.Title ? "center" : "",
-              backgroundColor: parameter.type === ParT.Title ? "#EEEEEE" : ""
-            },
-            children: getParameterDescription(parameter)
-          }
-        ),
-        parameter.type !== ParT.Title && /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: parameter.enabled ? renderInputField(parameter, index2) : parameter.value })
-      ] }, index2) : null
-    ) })
-  ] }) });
-};
-const Command = {
-  GetMaterialAndPenTable: {
-    Command: "GetMaterialAndPenTable"
-  },
-  GetLibraryObjects: {
-    Command: "GetLibraryObjects"
-  },
-  Generate3DModel: {
-    Command: "Generate3DModel"
-  },
-  GetPreviewImage: {
-    Command: "GetPreviewImage"
-  }
-};
-const Endpoint = {
-  API: "http://yhk.tgl-cloud.com:8989/ConvertToJSON",
-  FILE_UPLOAD: "http://yhk.tgl-cloud.com:8989/register"
-};
 function ConvertJsonDataToThreeMeshes({
   jsonData,
   textureLocation,
@@ -21960,6 +21960,26 @@ if (process$1.env.NODE_ENV !== "production") {
 const Tree = Tree$1;
 Tree.DirectoryTree = ForwardDirectoryTree;
 Tree.TreeNode = ContextTreeNode;
+function objectToURLSearchParams(obj, prefix) {
+  const params = new URLSearchParams();
+  function buildParams(prefix2, obj2) {
+    for (const key in obj2) {
+      if (obj2.hasOwnProperty(key)) {
+        const value = obj2[key];
+        const paramKey = prefix2 ? `${prefix2}[${key}]` : key;
+        if (typeof value === "object" && value !== null) {
+          buildParams(paramKey, value);
+        } else {
+          params.append(paramKey, value);
+        }
+      }
+    }
+  }
+  buildParams(prefix, obj);
+  return params;
+}
+var cjs = { exports: {} };
+var Draggable$2 = {};
 var propTypes = { exports: {} };
 var reactIs = { exports: {} };
 var reactIs_production_min = {};
@@ -22890,26 +22910,6 @@ if (process$1.env.NODE_ENV !== "production") {
   propTypes.exports = requireFactoryWithThrowingShims()();
 }
 var propTypesExports = propTypes.exports;
-function objectToURLSearchParams(obj, prefix) {
-  const params = new URLSearchParams();
-  function buildParams(prefix2, obj2) {
-    for (const key in obj2) {
-      if (obj2.hasOwnProperty(key)) {
-        const value = obj2[key];
-        const paramKey = prefix2 ? `${prefix2}[${key}]` : key;
-        if (typeof value === "object" && value !== null) {
-          buildParams(paramKey, value);
-        } else {
-          params.append(paramKey, value);
-        }
-      }
-    }
-  }
-  buildParams(prefix, obj);
-  return params;
-}
-var cjs = { exports: {} };
-var Draggable$2 = {};
 function r(e) {
   var t, f, n = "";
   if ("string" == typeof e || "number" == typeof e) n += e;
