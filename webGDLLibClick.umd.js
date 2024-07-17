@@ -54862,7 +54862,10 @@
   };
   console.log("React version in library:", React$1.version);
   const Test = () => {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "Loaded library" });
+    const onClick = () => {
+      console.log("bravo");
+    };
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { onClick, children: "Loaded library" });
   };
   const add = (a, b) => a + b;
   window.process = {
