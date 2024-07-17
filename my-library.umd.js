@@ -3103,7 +3103,7 @@
       fetchData();
     }, []);
     return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { children: "Data Loaded" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { children: "Data Loaded OK" }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { children: data ? JSON.stringify(data, null, 2) : "Loading..." })
     ] });
   };
