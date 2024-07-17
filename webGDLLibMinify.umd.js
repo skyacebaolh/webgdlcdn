@@ -24241,7 +24241,7 @@
   };
   const { DirectoryTree } = Tree;
   const textureLoadedCallback = () => console.log("Texture loaded");
-  const App = ({ consumerSetMeshes }) => {
+  const WebGDL = ({ consumerSetMeshes }) => {
     const [models, setModels] = React$1.useState([]);
     React$1.useState([]);
     const [materialAndPenTable, setMaterialAndPenTable] = React$1.useState();
@@ -24469,7 +24469,7 @@
       NODE_ENV: "production"
     }
   };
-  exports2.App = App;
+  exports2.WebGDL = WebGDL;
   exports2.add = add;
   Object.defineProperty(exports2, Symbol.toStringTag, { value: "Module" });
 });

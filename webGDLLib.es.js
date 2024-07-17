@@ -24223,7 +24223,7 @@ const PropertiesDialog = (props) => {
 };
 const { DirectoryTree } = Tree;
 const textureLoadedCallback = () => console.log("Texture loaded");
-const App = ({ consumerSetMeshes }) => {
+const WebGDL = ({ consumerSetMeshes }) => {
   const [models, setModels] = useState([]);
   useState([]);
   const [materialAndPenTable, setMaterialAndPenTable] = useState();
@@ -24452,6 +24452,6 @@ window.process = {
   }
 };
 export {
-  App,
+  WebGDL,
   add
 };
