@@ -54861,11 +54861,11 @@
     return null;
   };
   console.log("React version in library:", React$1.version);
-  const Test = () => {
+  const Test = ({ text }) => {
     const onClick = () => {
       console.log("bravo");
     };
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { onClick, children: "Loaded library" });
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { onClick, children: text });
   };
   const add = (a, b) => a + b;
   window.process = {
