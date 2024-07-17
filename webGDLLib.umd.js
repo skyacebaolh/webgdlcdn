@@ -24468,7 +24468,8 @@
   };
   console.log("React version in library:", React$1.version);
   const Test = () => {
-    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: "OK LET'S GO" });
+    const [text, setText] = React$1.useState("Mark my word");
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { children: text });
   };
   const add = (a, b) => a + b;
   window.process = {
